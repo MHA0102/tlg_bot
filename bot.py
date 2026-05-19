@@ -118,11 +118,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             }
         ],
         "temperature": 0.7,
-        "max_tokens": 400
+        "max_tokens": 300
     }
 
     try:
-        response = requests.post(LM_STUDIO_URL, json=payload, timeout=60)
+        response = requests.post(LM_STUDIO_URL, json=payload, timeout=180)
         result = response.json()
         answer = result["choices"][0]["message"]["content"]
 
