@@ -117,8 +117,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "content": text
             }
         ],
-        "temperature": 0.2,
-        "max_tokens": 300
+        "temperature": 0.2
     }
 
     try:
