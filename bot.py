@@ -26,7 +26,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = "Расскажи про роли игроков в футболе и их функции."
 
     elif text == "🏟 Команды":
-        text = "Назови известные футбольные клубы мира и их особенности."
+        text = "Назови известные футбольные клубы мира."
 
     payload = {
         "model": "local-model",
