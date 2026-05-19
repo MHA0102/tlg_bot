@@ -2,7 +2,7 @@ import requests
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
-TOKEN = "8873438835:AAFEy-mzaajNlMeF0zCqrsZ6Uc-dyvo_9J0"
+TOKEN = "Bot_Token"
 
 LM_STUDIO_URL = "http://127.0.0.1:1234/v1/chat/completions"
 
