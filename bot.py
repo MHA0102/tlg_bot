@@ -1,8 +1,8 @@
 import requests
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
+from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters, CommandHandler
 
-TOKEN = "Bot_Token"
+TOKEN = "8873438835:AAFEy-mzaajNlMeF0zCqrsZ6Uc-dyvo_9J0"
 
 LM_STUDIO_URL = "http://127.0.0.1:1234/v1/chat/completions"
 
@@ -13,116 +13,58 @@ keyboard = [
 
 markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
+
+# /start
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "👋 Привет! Я твой футбольный AI-ассистент.\n"
+        "Выбери тему или задай вопрос ⚽",
+        reply_markup=markup
+    )
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
+    user_text = update.message.text
 
-    if text == "📘 Правила футбола":
-        text = "Объясни основные правила футбола простыми словами."
+    # кнопки
+    if user_text == "📘 Правила футбола":
+        user_text = "Объясни правила футбола простыми словами"
 
-    elif text == "🧠 Тактики":
-        text = "Объясни футбольные тактики: 4-3-3, 4-4-2, 3-5-2."
+    elif user_text == "🧠 Тактики":
+        user_text = "Объясни футбольные схемы 4-3-3, 4-4-2, 3-5-2"
 
-    elif text == "⚽ Игроки":
-        text = "Расскажи про роли игроков в футболе и их функции."
+    elif user_text == "⚽ Игроки":
+        user_text = "Какие роли есть у игроков в футболе"
 
-    elif text == "🏟 Команды":
-        text = "Назови известные футбольные клубы мира."
+    elif user_text == "🏟 Команды":
+        user_text = "Назови топ футбольных клубов мира"
 
     payload = {
-        "model": "local-model",
+        "model": "local-model",  # LM Studio сам подставит загруженную модель
         "messages": [
             {
                 "role": "system",
-                "content": """Ты — футбольный AI-ассистент и спортивный аналитик.
-
-========================
-🎯 ГЛАВНАЯ РОЛЬ
-========================
-Ты отвечаешь ТОЛЬКО на вопрос пользователя.
-Ты НЕ ведёшь диалог сам с собой.
-Ты НЕ задаёшь вопросы сам себе.
-Ты НЕ продолжаешь мысль без запроса пользователя.
-
-========================
-🚫 КРИТИЧЕСКИЕ ЗАПРЕТЫ
-========================
-Строго запрещено:
-- создавать диалоги (Human/Assistant внутри ответа)
-- задавать вопросы и сразу отвечать на них
-- придумывать новые темы без запроса пользователя
-- добавлять лишние рассуждения вне вопроса
-- писать “возможные сценарии” если их не просили
-- выдумывать реальные матчи, результаты, новости, статистику
-
-Если данных нет → отвечай строго:
-"нет данных"
-
-========================
-⚽ ФУТБОЛЬНЫЕ ФУНКЦИИ
-========================
-Ты можешь:
-- объяснять тактики (4-3-3, 4-2-3-1 и т.д.)
-- объяснять правила футбола
-- разбирать стили команд
-- объяснять роли игроков
-- делать общий футбольный анализ
-
-Ты НЕ можешь:
-- придумывать реальные результаты матчей
-- придумывать составы и статистику
-- выдумывать новости
-
-========================
-🧠 ПРАВИЛО ОТВЕТА (ОЧЕНЬ ВАЖНО)
-========================
-Формат ответа всегда:
-
-1. Прямой ответ на вопрос
-2. Краткое объяснение (если нужно)
-3. Всё. Никаких дополнительных блоков
-
-НЕ добавляй:
-- “вопросы к пользователю”
-- “давай обсудим”
-- “хочешь ещё?”
-- “что ты думаешь?”
-
-========================
-🗣️ СТИЛЬ
-========================
-- Кратко
-- Как спортивный аналитик
-- Без воды
-- Без фантазий
-- Без самодиалога
-
-========================
-🌍 ЯЗЫК
-========================
-- Всегда отвечай на языке пользователя
-- Не меняй язык сам
-
-========================
-🧪 ПРОВЕРКА СЕБЯ ПЕРЕД ОТВЕТОМ
-========================
-Перед ответом проверь:
-- Я не придумал факт?
-- Я не начал диалог сам с собой?
-- Я ответил только на вопрос?
-
-Если хоть один пункт нарушен → исправь ответ."""
+                "content": (
+                    "Ты футбольный AI-аналитик.\n"
+                    "Отвечай кратко и по делу.\n"
+                    "Не выдумывай факты.\n"
+                    "Если не знаешь — скажи 'нет данных'."
+                )
             },
             {
                 "role": "user",
-                "content": text
+                "content": user_text
             }
         ],
-        "temperature": 0.2
+        "temperature": 0.6,
+        "max_tokens": 800,
+        "stream": False
     }
 
     try:
-        response = requests.post(LM_STUDIO_URL, json=payload, timeout=180)
+        response = requests.post(LM_STUDIO_URL, json=payload, timeout=300)
         result = response.json()
+
         answer = result["choices"][0]["message"]["content"]
 
         await update.message.reply_text(answer, reply_markup=markup)
@@ -131,7 +73,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Ошибка: {e}", reply_markup=markup)
 
 
+# запуск
 app = ApplicationBuilder().token(TOKEN).build()
+
+app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("Бот запущен")
